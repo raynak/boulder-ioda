@@ -398,8 +398,8 @@ end
 GRAPHICS-WINDOW
 482
 10
-1242
-791
+727
+191
 -1
 -1
 30.0
@@ -413,8 +413,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-24
--24
+4
+-4
 0
 1
 1
@@ -494,7 +494,7 @@ NIL
 T
 OBSERVER
 NIL
-I
+8
 NIL
 NIL
 1
@@ -511,7 +511,7 @@ NIL
 T
 OBSERVER
 NIL
-K
+2
 NIL
 NIL
 1
@@ -528,7 +528,7 @@ NIL
 T
 OBSERVER
 NIL
-P
+5
 NIL
 NIL
 1
@@ -545,7 +545,7 @@ NIL
 T
 OBSERVER
 NIL
-L
+6
 NIL
 NIL
 1
@@ -562,7 +562,7 @@ NIL
 T
 OBSERVER
 NIL
-J
+4
 NIL
 NIL
 1
@@ -586,7 +586,7 @@ CHOOSER
 level
 level
 "level0" "level1" "level2"
-1
+0
 
 MONITOR
 287
@@ -609,6 +609,30 @@ step-by-step?
 0
 1
 -1000
+
+BUTTON
+46
+68
+152
+101
+To-Do!!!
+setup\noutput-print ioda:primitives-to-write
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+OUTPUT
+1332
+23
+1847
+400
+12
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -781,7 +805,6 @@ false
 0
 Polygon -13345367 true false 15 90 60 30 240 30 285 90 285 150 150 300 15 150
 Polygon -11221820 false false 60 30 240 30 285 90 285 150 150 300 15 150 15 90
-Line -11221820 false 30 150 30 150
 Line -11221820 false 15 150 285 150
 Line -11221820 false 15 90 285 90
 Line -11221820 false 120 30 90 90

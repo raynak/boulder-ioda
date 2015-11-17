@@ -290,7 +290,17 @@ to rocks::die
   ioda:die
 end
 
+to report rocks::roll-left?
+  report not any? turtles-on patch-at -1 0 and  not any? turtles-on patch-at -1 -1
+end
 
+to report rocks::roll-right?
+  report not any? turtles-on patch-at 1 0 and  not any? turtles-on patch-at 1 -1
+end
+
+to report rocks::roll?
+  report rocks::roll-left? or roll-right?
+end
 
 ; monsters-related primitives
 
@@ -494,7 +504,7 @@ NIL
 T
 OBSERVER
 NIL
-I
+8
 NIL
 NIL
 1
@@ -511,7 +521,7 @@ NIL
 T
 OBSERVER
 NIL
-K
+2
 NIL
 NIL
 1
@@ -545,7 +555,7 @@ NIL
 T
 OBSERVER
 NIL
-L
+6
 NIL
 NIL
 1
@@ -562,7 +572,7 @@ NIL
 T
 OBSERVER
 NIL
-J
+4
 NIL
 NIL
 1
@@ -781,7 +791,6 @@ false
 0
 Polygon -13345367 true false 15 90 60 30 240 30 285 90 285 150 150 300 15 150
 Polygon -11221820 false false 60 30 240 30 285 90 285 150 150 300 15 150 15 90
-Line -11221820 false 30 150 30 150
 Line -11221820 false 15 150 285 150
 Line -11221820 false 15 90 285 90
 Line -11221820 false 120 30 90 90

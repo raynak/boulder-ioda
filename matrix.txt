@@ -35,7 +35,9 @@ rocks		StopFalling 	 10 	walls		 1
 rocks		StopFalling 	 10 	dirt		 1 	
 rocks		StopFalling 	 10 	diamonds 	 1 
 rocks		StopFalling 	 10 	rocks		 1 
-rocks		StopFalling 	 10 	doors		 1 
+rocks		StopFalling 	 10 	doors	 	 1
+rocks 		RollLeft	 11
+rocks 		RollRight	 11  	  		 
 rocks		Explode 	 50 	monsters	 1 
 rocks		Explode 	 50 	heros		 1 
 

@@ -1,0 +1,6 @@
+[7 5]
+XXXXXXX
+XH R  X
+X     X
+X  R  O
+XXXXXXX

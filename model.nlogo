@@ -281,6 +281,14 @@ to rocks::move-down
   default::move-down
 end
 
+to rocks::move-left
+  move-to patch-at -1 0
+end
+
+to rocks::move-right
+  move-to patch-at 1 0
+end
+
 to rocks::create-blast
   let dm? ifelse-value ([breed] of ioda:my-target = monsters) [ [right-handed?] of ioda:my-target ] [ true ]
   hatch-blast 1 [ init-blast dm? ]
@@ -290,17 +298,17 @@ to rocks::die
   ioda:die
 end
 
-to report rocks::roll-left?
-  report not any? turtles-on patch-at -1 0 and  not any? turtles-on patch-at -1 -1
+to-report rocks::roll-left?
+  report not any? turtles-on patch-at -1 0  and not any? turtles-on patch-at -1 -1
 end
 
-to report rocks::roll-right?
+to-report rocks::roll-right?
   report not any? turtles-on patch-at 1 0 and  not any? turtles-on patch-at 1 -1
 end
 
-to report rocks::roll?
-  report rocks::roll-left? or roll-right?
-end
+
+
+
 
 ; monsters-related primitives
 
@@ -406,13 +414,13 @@ to heros::increase-score
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-482
+498
 10
-727
-191
+870
+403
 -1
 -1
-30.0
+14.5
 1
 10
 1
@@ -423,8 +431,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-4
--4
+24
+-24
 0
 1
 1
@@ -538,7 +546,7 @@ NIL
 T
 OBSERVER
 NIL
-5
+P
 NIL
 NIL
 1
@@ -595,8 +603,8 @@ CHOOSER
 108
 level
 level
-"level0" "level1" "level2"
-0
+"levelRoll" "level0" "level1" "level2"
+3
 
 MONITOR
 287
@@ -619,30 +627,6 @@ step-by-step?
 0
 1
 -1000
-
-BUTTON
-46
-68
-152
-101
-To-Do!!!
-setup\noutput-print ioda:primitives-to-write
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-OUTPUT
-1332
-23
-1847
-400
-12
 
 @#$#@#$#@
 ## WHAT IS IT?

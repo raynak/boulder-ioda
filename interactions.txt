@@ -37,6 +37,16 @@ parallel interaction StopFalling
   actions	     stop-moving
 end
 
+parallel interaction RollLeft
+  condition          not:moving? roll-left?
+  actions            move-left
+end
+
+parallel interaction RollRight
+  condition          not:moving? roll-right?
+  actions            move-right
+end
+
 parallel interaction Advance
   condition 	     nothing-ahead? moving?
   actions	     move-forward

@@ -408,8 +408,8 @@ end
 GRAPHICS-WINDOW
 482
 10
-1242
-791
+727
+191
 -1
 -1
 30.0
@@ -423,8 +423,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-24
--24
+4
+-4
 0
 1
 1
@@ -538,7 +538,7 @@ NIL
 T
 OBSERVER
 NIL
-P
+5
 NIL
 NIL
 1
@@ -596,7 +596,7 @@ CHOOSER
 level
 level
 "level0" "level1" "level2"
-1
+0
 
 MONITOR
 287
@@ -619,6 +619,30 @@ step-by-step?
 0
 1
 -1000
+
+BUTTON
+46
+68
+152
+101
+To-Do!!!
+setup\noutput-print ioda:primitives-to-write
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+OUTPUT
+1332
+23
+1847
+400
+12
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -298,12 +298,16 @@ to rocks::die
   ioda:die
 end
 
+to-report rocks::on-diamonds-or-rocks?
+  report ( any? diamonds-on patch-at 0 -1 or any? rocks on patch-at 0 -1 )
+end
+
 to-report rocks::roll-left?
-  report not any? turtles-on patch-at -1 0  and not any? turtles-on patch-at -1 -1
+  report ( not any? turtles-on patch-at -1 0  and not any? turtles-on patch-at -1 -1 )
 end
 
 to-report rocks::roll-right?
-  report not any? turtles-on patch-at 1 0 and  not any? turtles-on patch-at 1 -1
+  report ( not any? turtles-on patch-at 1 0 and  not any? turtles-on patch-at 1 -1 )
 end
 
 
@@ -414,10 +418,10 @@ to heros::increase-score
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-498
-10
-870
-403
+572
+52
+944
+445
 -1
 -1
 14.5
@@ -604,7 +608,7 @@ CHOOSER
 level
 level
 "levelRoll" "level0" "level1" "level2"
-3
+2
 
 MONITOR
 287

@@ -38,12 +38,12 @@ parallel interaction StopFalling
 end
 
 parallel interaction RollLeft
-  condition          not:moving? roll-left?
+  condition          not:moving? on-diamonds-or-rocks? roll-left?
   actions            move-left
 end
 
 parallel interaction RollRight
-  condition          not:moving? roll-right?
+  condition          not:moving? on-diamonds-or-rocks? roll-right?
   actions            move-right
 end
 

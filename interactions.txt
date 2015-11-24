@@ -85,3 +85,9 @@ parallel interaction Collect
   actions	     target:die increase-score move-forward
 end
 
+exclusive interaction Push
+  trigger	     target-ahead? target:can-be-pushed?
+  condition	     moving?
+  actions	     target:move-forward move-forward
+end 
+

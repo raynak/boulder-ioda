@@ -11,6 +11,7 @@ breed [diamonds diamond]
 breed [dirt]
 breed [blast]
 
+
 globals       [ score nb-to-collect countdown ]
 heros-own     [ moving? orders ]
 diamonds-own  [ moving? ]
@@ -244,6 +245,26 @@ to diamonds::move-down
   default::move-down
 end
 
+to diamonds::move-left
+  move-to patch-at -1 0
+end
+
+to diamonds::move-right
+  move-to patch-at 1 0
+end
+
+to-report diamonds::on-diamonds-or-rocks?
+  report ( any? diamonds-on patch-at 0 -1 ) and ( not any? heros-on patch-at 0 -1)
+end
+
+to-report diamonds::roll-left?
+  report ( not any? turtles-on patch-at -1 0  and not any? turtles-on patch-at -1 -1 )
+end
+
+to-report diamonds::roll-right?
+  report ( not any? turtles-on patch-at 1 0 and  not any? turtles-on patch-at 1 -1 )
+end
+
 to diamonds::create-blast
   let dm? ifelse-value ([breed] of ioda:my-target = monsters) [ [right-handed?] of ioda:my-target ] [ true ]
   hatch-blast 1 [ init-blast dm? ]
@@ -299,7 +320,7 @@ to rocks::die
 end
 
 to-report rocks::on-diamonds-or-rocks?
-  report ( any? diamonds-on patch-at 0 -1 or any? rocks on patch-at 0 -1 )
+  report ( any? diamonds-on patch-at 0 -1 or any? rocks-on patch-at 0 -1 ) and ( not any? heros-on patch-at 0 -1)
 end
 
 to-report rocks::roll-left?
@@ -310,9 +331,20 @@ to-report rocks::roll-right?
   report ( not any? turtles-on patch-at 1 0 and  not any? turtles-on patch-at 1 -1 )
 end
 
+to-report rocks::can-be-pushed?
+  let h ioda:my-target
+  face h
+  right 180
+  report ( not any? turtles-on patch-ahead 1 )
+  ;report rocks::roll-left? or rocks::roll-right?
+end
 
-
-
+to rocks::move-forward
+  let h ioda:my-target
+  face h
+  right 180
+  move-to patch-ahead 1
+end
 
 ; monsters-related primitives
 

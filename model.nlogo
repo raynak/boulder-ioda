@@ -10,18 +10,19 @@ breed [rocks rock]
 breed [diamonds diamond]
 breed [dirt]
 breed [blast]
-breed [amibe]
+breed [amibes amibe]
 
 
+blast-own     [ strength diamond-maker? time-birth ]
+diamonds-own  [ moving? ]
+doors-own     [ open? ]
 globals       [ score nb-to-collect countdown ]
 heros-own     [ moving? orders open? ]
-diamonds-own  [ moving? ]
 monsters-own  [ moving? right-handed? ]
 rocks-own     [ moving? ]
 walls-own     [ destructible? ]
-doors-own     [ open? ]
-blast-own     [ strength diamond-maker? ]
-amibe-own    [ destructible? ]
+
+
 patches-own   [ dijkstra-distance ]
 
 to setup
@@ -76,12 +77,12 @@ to create-agent [ char ]
                         [ ifelse (char = "M")
                           [ sprout-monsters 1 [ init-monster ]]
                             [ ifelse (char = "A")
-                              [ sprout-amibe 1 [ init-amibe ]]
+                              [ sprout-amibes 1 [ init-amibe ]]
                               [ ifelse (char = ".")
                                 [ sprout-dirt 1 [ init-dirt ]]
                                 [ ;
-                                  ]
                                 ]
+                              ]
                             ]
                         ]
                     ]
@@ -100,6 +101,7 @@ to init-world
   set-default-shape diamonds "diamond"
   set-default-shape dirt "dirt"
   set-default-shape blast "star"
+  set-default-shape amibes "rock 1"
   read-level (word level ".txt")
   set countdown 0
   set nb-to-collect count diamonds
@@ -127,7 +129,6 @@ to init-amibe
   set heading 0
   set color green
   set shape "rock 1"
-  set destructible? false
 end
 
 
@@ -159,6 +160,7 @@ to init-blast [ dm? ]
   set color orange
   set strength 3
   set diamond-maker? dm?
+  set time-birth ticks
 end
 
 to init-dirt
@@ -292,13 +294,17 @@ end
 
 
 
+
+
 ; rocks-related primitives
 
 to rocks::filter-neighbors
   ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
 end
 
+
 to-report rocks::nothing-below?
+  print default::nothing-below?
   report default::nothing-below?
 end
 
@@ -326,9 +332,15 @@ to rocks::move-right
   move-to patch-at 1 0
 end
 
+
 to rocks::create-blast
-  let dm? ifelse-value ([breed] of ioda:my-target = monsters) [ [right-handed?] of ioda:my-target ] [ true ]
-  hatch-blast 1 [ init-blast dm? ]
+  let dm? ifelse-value ( ([ breed] of ioda:my-target = monsters ) ) [ [right-handed?] of ioda:my-target ] [ true ]
+  rocks::move-down
+  ask neighbors  [ ask turtles-on patch-at 0 0 [
+      ioda:die
+      hatch-blast 1 [ init-blast dm? ]
+  ]
+  ]
 end
 
 to rocks::die
@@ -361,6 +373,10 @@ to rocks::move-forward
   right 180
   move-to patch-ahead 1
 end
+
+
+
+
 
 ; monsters-related primitives
 
@@ -395,11 +411,16 @@ to monsters::create-blast
   hatch-blast 1 [ init-blast dm? ]
 end
 
+
+
+
 ; dirt-related primitives
 
 to dirt::die
   ioda:die
 end
+
+
 
 
 
@@ -422,7 +443,7 @@ to-report heros::target-ahead?
 end
 
 to-report heros::moving?
-    heros::propagate-dist
+  heros::propagate-dist
   report moving?
 end
 
@@ -468,6 +489,20 @@ end
 
 
 
+
+
+; blast functions
+
+to-report blast::time-to-change?
+  report ( ( ticks - time-birth ) >= 50 )
+end
+
+to blast::to-diamond
+  ioda:die
+  hatch-diamonds  1 [ init-diamond ]
+end
+
+
 to labelize
   ask patches with [ not any? walls-here ] [ set plabel dijkstra-distance ]
 end
@@ -498,14 +533,21 @@ to heros::propagate-dist
       set p pp ]
 end
 
-to-report amibe::can-spread?
+
+
+
+to amibes::filter-neighbors
+  ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
+end
+
+to-report amibes::can-spread?
   print "can-spread"
-  let b ( not any? dirt-on ([neighbors4] of patch-here) )
+  let b ( any? dirt-on ([neighbors4] of patch-here) )
   print 1;and ticks = 1000
   report true
 end
 
-to amibe::spread
+to amibes::spread
   ask neighbors4 with [ any? dirt-here ] [
     set pcolor red
   ]
@@ -516,8 +558,8 @@ end
 GRAPHICS-WINDOW
 572
 -5
-817
-206
+834
+242
 -1
 -1
 36.0
@@ -531,8 +573,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-4
--4
+6
+-5
 0
 1
 1
@@ -699,11 +741,11 @@ nb-to-collect
 CHOOSER
 278
 63
-416
+434
 108
 level
 level
-"levelRoll" "level0" "level1" "level2"
+"levelRoll" "level_explosion" "level0" "level1" "level2"
 1
 
 MONITOR

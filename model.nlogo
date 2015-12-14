@@ -10,16 +10,19 @@ breed [rocks rock]
 breed [diamonds diamond]
 breed [dirt]
 breed [blast]
+breed [amibe]
 
 
 globals       [ score nb-to-collect countdown ]
-heros-own     [ moving? orders ]
+heros-own     [ moving? orders open? ]
 diamonds-own  [ moving? ]
 monsters-own  [ moving? right-handed? ]
 rocks-own     [ moving? ]
 walls-own     [ destructible? ]
 doors-own     [ open? ]
 blast-own     [ strength diamond-maker? ]
+amibe-own    [ destructible? ]
+patches-own   [ dijkstra-distance ]
 
 to setup
   clear-all
@@ -71,10 +74,13 @@ to create-agent [ char ]
                     [ ifelse (char = "R")
                         [ sprout-rocks 1 [ init-rock ]]
                         [ ifelse (char = "M")
-                            [ sprout-monsters 1 [ init-monster ]]
-                            [ ifelse (char = ".")
-                                [ sprout-dirt 1 [ init-dirt ] ]
-                                [ ;;;;;; other agents ?
+                          [ sprout-monsters 1 [ init-monster ]]
+                            [ ifelse (char = "A")
+                              [ sprout-amibe 1 [ init-amibe ]]
+                              [ ifelse (char = ".")
+                                [ sprout-dirt 1 [ init-dirt ]]
+                                [ ;
+                                  ]
                                 ]
                             ]
                         ]
@@ -104,6 +110,7 @@ to init-hero
   set heading 0
   set color red
   set moving? false
+  set open? false
   set orders []
 end
 
@@ -113,6 +120,14 @@ to init-door
   set color blue - 4
   set shape "tile brick"
   set open? false
+end
+
+to init-amibe
+  ioda:init-agent
+  set heading 0
+  set color green
+  set shape "rock 1"
+  set destructible? false
 end
 
 
@@ -210,6 +225,7 @@ end
 
 to doors::change-state
   set open? not open?
+  ask heros [ set open? not open? ]
   ifelse open?
     [ set color yellow + 2
       set shape "door-open" ]
@@ -406,6 +422,7 @@ to-report heros::target-ahead?
 end
 
 to-report heros::moving?
+    heros::propagate-dist
   report moving?
 end
 
@@ -448,15 +465,62 @@ to heros::increase-score
   set score score + 1
   set nb-to-collect nb-to-collect - 1
 end
+
+
+
+to labelize
+  ask patches with [ not any? walls-here ] [ set plabel dijkstra-distance ]
+end
+
+to-report obstacle-here? [mykeys immediate?]
+  report (pcolor = black) or (any? walls-here)
+end
+
+
+
+to heros::propagate-dist
+  ask patches with [ not any? walls-here ]
+    [ set dijkstra-distance -1 set plabel "" ]
+    let p ifelse-value ( not doors::open? ) [ patches with [ any? diamonds-here ] ] [ patches with [ any? doors-here ] ]
+  ask p
+    [ set dijkstra-distance 0
+      if show-dijkstra? [ set plabel 0 ]
+    ]
+  let s 0
+  while [ any? p ]
+    [ set s s + 1
+      let pp patch-set ([neighbors4 with [ ((dijkstra-distance < 0) or (dijkstra-distance > s)) ]] of p)
+      ask pp
+        [ set dijkstra-distance s
+          if show-dijkstra?
+          [ set plabel dijkstra-distance ]
+        ]
+      set p pp ]
+end
+
+to-report amibe::can-spread?
+  print "can-spread"
+  let b ( not any? dirt-on ([neighbors4] of patch-here) )
+  print 1;and ticks = 1000
+  report true
+end
+
+to amibe::spread
+  ask neighbors4 with [ any? dirt-here ] [
+    set pcolor red
+  ]
+
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 572
-52
-944
-445
+-5
+817
+206
 -1
 -1
-14.5
+36.0
 1
 10
 1
@@ -467,8 +531,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-24
--24
+4
+-4
 0
 1
 1
@@ -640,7 +704,7 @@ CHOOSER
 level
 level
 "levelRoll" "level0" "level1" "level2"
-2
+1
 
 MONITOR
 287
@@ -660,6 +724,17 @@ SWITCH
 155
 step-by-step?
 step-by-step?
+0
+1
+-1000
+
+SWITCH
+282
+190
+466
+223
+show-dijkstra?
+show-dijkstra?
 0
 1
 -1000

@@ -91,3 +91,7 @@ exclusive interaction Push
   actions	     target:move-forward move-forward
 end 
 
+exclusive interaction Spread
+  trigger	     can-spread?
+  actions	     spread
+end

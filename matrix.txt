@@ -59,3 +59,5 @@ heros		Dig		 20 	dirt		 1
 heros		Push		 30	rocks		 1
 heros		Collect		 80    	diamonds	 1 
 heros		Explode		 100    monsters	 0 
+
+amibe		Spread		 1	UPDATE

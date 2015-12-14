@@ -97,6 +97,18 @@ exclusive interaction Spread
 end
 
 parallel interaction ConvertToDiamond
-  trigger          time-to-change?
+  trigger      	     time-to-change?
   actions	     to-diamond
 end
+
+parallel interaction PutDynamite
+  trigger	     not:nothing-ahead? has-dynamite?
+  actions	     put-dynamite
+end
+
+parallel interaction Explode
+  trigger	     can-explose?
+  actions 	     explode
+end
+
+

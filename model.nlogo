@@ -11,16 +11,19 @@ breed [diamonds diamond]
 breed [dirt]
 breed [blast]
 breed [amibes amibe]
+breed [dynamite]
 
 
+amibes-own    [ time-spread ]
 blast-own     [ strength diamond-maker? time-birth ]
 diamonds-own  [ moving? ]
 doors-own     [ open? ]
 globals       [ score nb-to-collect countdown ]
-heros-own     [ moving? orders open? ]
+heros-own     [ moving? orders open? nb-dynamite ]
 monsters-own  [ moving? right-handed? ]
 rocks-own     [ moving? ]
 walls-own     [ destructible? ]
+
 
 
 patches-own   [ dijkstra-distance ]
@@ -33,6 +36,7 @@ to setup
   ioda:setup
   ioda:set-metric "Moore"
   reset-ticks
+  reset-timer
 end
 
 to go
@@ -77,7 +81,7 @@ to create-agent [ char ]
                         [ ifelse (char = "M")
                           [ sprout-monsters 1 [ init-monster ]]
                             [ ifelse (char = "A")
-                              [ sprout-amibes 1 [ init-amibe ]]
+                              [ sprout-amibes 1 [ init-amibe [ 0 ] ]]
                               [ ifelse (char = ".")
                                 [ sprout-dirt 1 [ init-dirt ]]
                                 [ ;
@@ -102,6 +106,8 @@ to init-world
   set-default-shape dirt "dirt"
   set-default-shape blast "star"
   set-default-shape amibes "rock 1"
+  set-default-shape dynamite "target"
+
   read-level (word level ".txt")
   set countdown 0
   set nb-to-collect count diamonds
@@ -114,6 +120,7 @@ to init-hero
   set moving? false
   set open? false
   set orders []
+  set nb-dynamite 2
 end
 
 to init-door
@@ -124,11 +131,12 @@ to init-door
   set open? false
 end
 
-to init-amibe
+to init-amibe [ time ]
   ioda:init-agent
   set heading 0
   set color green
   set shape "rock 1"
+  set time-spread 0
 end
 
 
@@ -173,6 +181,11 @@ to init-wall [ d ]
   set destructible? d
   set heading 0
   set color blue - 4
+end
+
+to init-dynamite
+  ioda:init-agent
+  set color red
 end
 
 
@@ -304,7 +317,6 @@ end
 
 
 to-report rocks::nothing-below?
-  print default::nothing-below?
   report default::nothing-below?
 end
 
@@ -487,6 +499,15 @@ to heros::increase-score
   set nb-to-collect nb-to-collect - 1
 end
 
+to-report heros::has-dynamite?
+  report nb-dynamite >= 1
+end
+
+to heros::put-dynamite
+  ask turtles-on patch-ahead 1 [
+   hatch-dynamite 1 [ init-dynamite ]
+  ]
+end
 
 
 
@@ -536,30 +557,51 @@ end
 
 
 
+
+
+
+; amibes function
+
 to amibes::filter-neighbors
   ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
 end
 
 to-report amibes::can-spread?
-  print "can-spread"
-  let b ( any? dirt-on ([neighbors4] of patch-here) )
-  print 1;and ticks = 1000
-  report true
+  let b? ( any? dirt-on ([neighbors4] of patch-here) and ( timer - time-spread >= 3 ) )
+  report b?
 end
 
 to amibes::spread
-  ask neighbors4 with [ any? dirt-here ] [
-    set pcolor red
+  reset-timer
+  ask  one-of neighbors4 with [ any? dirt-here ] [
+    ask turtles-on patch-at 0 0  [
+      ioda:die
+      hatch-amibes 1 [ init-amibe [ 0 ] ]
+    ]
   ]
+  set time-spread 0
+end
 
 
+; dynamite function
+
+to-report dynamite::can-explose?
+  report timer >= 1
+end
+
+to dynamite::explode
+  ask neighbors  [ ask turtles-on patch-at 0 0 [
+    ioda:die
+    hatch-blast 1 [ init-blast true ]
+  ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 572
 -5
-834
-242
+817
+206
 -1
 -1
 36.0
@@ -573,8 +615,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-6
--5
+4
+-4
 0
 1
 1
@@ -746,7 +788,7 @@ CHOOSER
 level
 level
 "levelRoll" "level_explosion" "level0" "level1" "level2"
-1
+2
 
 MONITOR
 287
@@ -793,8 +835,13 @@ A cave is initialized in the setup procedure. The main character has to dig the 
 
 ## HOW TO USE IT
 
-You just have to click on **`setup`**, then on **`go`**. Your aim is to endow the character and the other agents with a better behavior than the initial one.
+You just have to click on **`setup`**, then on **`go`**. Your aim is to endow the character and the other agents with a better behavior than the initial one.##""
 
+
+## IMPLEMENTATION CHOICES ##
+
+* Amibe : the amibe can spread every 10 seconds if there is any dirt around.
+Then only one amibe can spread at that time, randomly choose among the amoeba on the game
 
 ## HOW TO CITE
 

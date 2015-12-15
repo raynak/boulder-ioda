@@ -1,0 +1,12 @@
+[7 10]
+1
+XXXXXXX
+X.H RDX
+X.R   X
+X.    X
+X.WWWWX
+X..   X
+X...  X
+X.. W X
+X..   O
+XXXXXXX

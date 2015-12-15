@@ -3,6 +3,7 @@ __includes ["IODA_2_3.nls"]
 extensions [ioda]
 
 breed [walls wall]
+breed [magicwalls magicwall]
 breed [heros hero]
 breed [monsters monster]
 breed [doors door]
@@ -14,19 +15,17 @@ breed [amibes amibe]
 breed [dynamite]
 
 
-amibes-own    [ time-spread ]
-blast-own     [ strength diamond-maker? time-birth ]
-diamonds-own  [ moving? ]
-doors-own     [ open? ]
-dynamite-own  [ on-floor? ]
-globals       [ score nb-to-collect countdown objectif ]
-heros-own     [ moving? orders open? nb-dynamite ]
-monsters-own  [ moving? right-handed? ]
-rocks-own     [ moving? ]
-walls-own     [ destructible? ]
-
-
-
+amibes-own     [ time-spread ]
+blast-own      [ strength diamond-maker? time-birth ]
+diamonds-own   [ moving? ]
+doors-own      [ open? ]
+dynamite-own   [ on-floor? ]
+globals        [ score nb-to-collect countdown objectif ]
+heros-own      [ moving? orders open? nb-dynamite ]
+magicwalls-own [ destructible? ]
+monsters-own   [ moving? right-handed? ]
+rocks-own      [ moving? ]
+walls-own      [ destructible? ]
 
 patches-own   [ dijkstra-distance ]
 
@@ -44,19 +43,72 @@ end
 to go
   ioda:go
   tick
+
   ifelse (not any? heros)
     [ ifelse (countdown = 0) [ user-message "GAME OVER !" stop ] [ set countdown countdown - 1 ]]
     [ if (all? heros [any? doors-here with [open?]])
-        [ user-message "CONGRATULATIONS !" stop ]
-    ]
+      [ user-message "LEVEL FINISHED !"
+          ifelse level = "level00_Collect" [
+            set level "level01_RockFall"
+          ]
+          [
+            ifelse level = "level01_RockFall" [
+              set level "level02_RockPush"
+            ]
+            [
+              ifelse level = "level02_RockPush" [
+                set level "level03_DiamondFall"
+              ]
+              [
+                ifelse level = "level03_DiamondFall" [
+                  set level "level04_KillMonster"
+                ]
+                [
+                  ifelse level = "level04_KillMonster" [
+                    set level "level05_MagicWall"
+                  ]
+                  [
+                    ifelse level = "level05_MagicWall" [
+                      set level "level06_Amoeba"
+                    ]
 
+                    [
+                      user-message "YOU JUST FINISHED THE GAME! CONGRATULATIONS!"
+                      stop
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+          init-world
+          setup
+      ]
+    ]
 end
+  ;        [ user-message "CONGRATULATIONS !" stop ][]
+;;        [ if ia? [
+;;          ask all? heros [
+;;            let t 3 heros::next-destination
+;;
+;;            heros::move-forward
+;;          ]
+;;        ]
+;;        ]
+;    ]
+;
+;
+;
+;end
 
 to read-level [ filename ]
+  print "lecture"
   file-open filename
-  let s read-from-string file-read-line ; list with width and height
+  let s read-from-string file-read-line
+  print s ; list with width and height
   resize-world 0 (first s - 1)  (1 - last s) 0
   let nb ( read-from-string file-read-line + 0 )
+  print nb
   set objectif nb
   let x 0 let y 0
   while [(y >= min-pycor) and (not file-at-end?)]
@@ -85,11 +137,15 @@ to create-agent [ char ]
                         [ ifelse (char = "M")
                           [ sprout-monsters 1 [ init-monster ]]
                             [ ifelse (char = "A")
-                              [ sprout-amibes 1 [ init-amibe [ 0 ] ]]
+                              [ sprout-amibes 1 [ init-amibe ]]
                               [ ifelse (char = ".")
                                 [ sprout-dirt 1 [ init-dirt ]]
+                                [ ifelse (char = "W")
+                                [ sprout-magicwalls 1 [ init-magicwall ]]
                                 [ ;
                                 ]
+                                ]
+
                               ]
                             ]
                         ]
@@ -111,6 +167,7 @@ to init-world
   set-default-shape blast "star"
   set-default-shape amibes "rock 1"
   set-default-shape dynamite "target"
+  set-default-shape magicwalls "tile brick"
 
   read-level (word level ".txt")
   set countdown 0
@@ -135,12 +192,12 @@ to init-door
   set open? false
 end
 
-to init-amibe [ time ]
+to init-amibe
   ioda:init-agent
   set heading 0
   set color green
   set shape "rock 1"
-  set time-spread 0
+  set time-spread ( 20 + random 30 )
 end
 
 
@@ -185,6 +242,13 @@ to init-wall [ d ]
   set destructible? d
   set heading 0
   set color blue - 4
+end
+
+to init-magicwall
+  ioda:init-agent
+  set destructible? false
+  set heading 0
+  set color orange
 end
 
 to init-dynamite
@@ -321,7 +385,6 @@ to rocks::filter-neighbors
   ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
 end
 
-
 to-report rocks::nothing-below?
   report default::nothing-below?
 end
@@ -352,8 +415,9 @@ end
 
 
 to rocks::create-blast
+  print ioda:my-target
   let dm? ifelse-value ( ([ breed] of ioda:my-target = monsters ) ) [ [right-handed?] of ioda:my-target ] [ true ]
-  rocks::move-down
+  ;rocks::move-down
   ask neighbors  [ ask turtles-on patch-at 0 0 [
       ioda:die
       hatch-blast 1 [ init-blast dm? ]
@@ -462,6 +526,12 @@ end
 
 to-report heros::moving?
   heros::propagate-dist
+  ifelse ia? [
+          face heros::next-destination
+          set moving? true
+        ][]
+  ;print patch-here
+  ;print min-one-of [ neighbors4 ] of patch-here  [ dijkstra-distance ]
   report moving?
 end
 
@@ -477,7 +547,7 @@ to heros::handle-messages
   foreach orders
     [ let m ?
       ifelse (m = "STOP")
-        [ set moving? false]
+        [ set moving? false ]
         [ set heading m set moving? true ]
     ]
   set orders []
@@ -493,7 +563,7 @@ to heros::die
 end
 
 to heros::move-forward
-  default::move-forward
+    default::move-forward
 end
 
 to heros::create-blast
@@ -522,19 +592,27 @@ to heros::put-dynamite
   reset-timer
 end
 
+to-report heros::next-destination
+  let p  neighbors4   with [ not any? walls-here and not any? magicwalls-here and not any? rocks-here and not any? amibes-here  ]
+  report min-one-of p [ dijkstra-distance ] ;[ neighbors4 ] of patch-here  [ dijkstra-distance ]
+end
 
 
 
 ; blast functions
 
 to-report blast::time-to-change?
-  report ( ( ticks - time-birth ) >= 50 )
+  report ( ( ticks - time-birth ) >= 2 )
 end
 
 to blast::to-diamond
   ioda:die
   hatch-diamonds  1 [ init-diamond ]
   set nb-to-collect nb-to-collect + 1
+end
+
+to blast::filter-neighbors
+  ioda:filter-neighbors-in-radius 1
 end
 
 
@@ -549,7 +627,7 @@ end
 
 
 to heros::propagate-dist
-  ask patches with [ not any? walls-here ]
+  ask patches with [ not any? walls-here  ]
     [ set dijkstra-distance -1 set plabel "" ]
     let p ifelse-value ( not doors::open? ) [ patches with [ any? diamonds-here ] ] [ patches with [ any? doors-here ] ]
   ask p
@@ -559,13 +637,18 @@ to heros::propagate-dist
   let s 0
   while [ any? p ]
     [ set s s + 1
-      let pp patch-set ([neighbors4 with [ ((dijkstra-distance < 0) or (dijkstra-distance > s)) ]] of p)
+      let pp patch-set ([neighbors4 with [ ((dijkstra-distance < 0) or (dijkstra-distance > s))  and not any? magicwalls-here
+       ;     and not any? rocks-here
+            ]] of p)
       ask pp
-        [ set dijkstra-distance s
+        [
+          set dijkstra-distance s
           if show-dijkstra?
           [ set plabel dijkstra-distance ]
         ]
       set p pp ]
+;    ask patches with [  any? magicwalls-here or any? rocks-here ]
+;    [ set dijkstra-distance 1000 set plabel "" ]
 end
 
 
@@ -581,20 +664,56 @@ to amibes::filter-neighbors
 end
 
 to-report amibes::can-spread?
-  let b? ( any? dirt-on ([neighbors4] of patch-here) and ( timer - time-spread >= 3 ) )
-  report b?
+  set time-spread time-spread - 1
+  print time-spread
+  report ( any? dirt-on ([neighbors4] of patch-here) )
+end
+
+to-report amibes::time-to-spread?
+  report time-spread <= 0
 end
 
 to amibes::spread
-  reset-timer
-  ask  one-of neighbors4 with [ any? dirt-here ] [
-    ask turtles-on patch-at 0 0  [
-      ioda:die
-      hatch-amibes 1 [ init-amibe [ 0 ] ]
+  set time-spread ( 5 + random 10 )
+  print "time spread reset"
+  print time-spread
+  ask  one-of neighbors4 with [ any? dirt-here or not any? turtles-here ] [
+    ifelse any? dirt-here [
+      ask turtles-on patch-at 0 0  [
+        ioda:die
+        hatch-amibes 1 [ init-amibe  ]
+      ]
     ]
+    [ sprout-amibes 1 [ init-amibe  ] ]
   ]
-  set time-spread 0
 end
+
+to-report amibes::can-statufy?
+  report ( ( random 100 ) > 98 )
+end
+
+to amibes::statufy
+  ask patch-here [ sprout-rocks 1 [ init-rock ] ]
+end
+
+to-report amibes::can-diamontify?
+  report not amibes::can-spread?
+end
+
+to amibes::diamontify
+  ask patch-here [ sprout-diamonds 1 [ init-diamond ] ]
+end
+
+to amibes::die
+  ioda:die
+end
+
+
+
+
+
+
+
 
 
 ; dynamite function
@@ -607,20 +726,46 @@ end
 to dynamite::explode
   ioda:die
   ask neighbors  [ ask turtles-on patch-at 0 0 [
-    ioda:die
-    hatch-blast 1 [ init-blast true ]
+    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls ) ) [
+      ioda:die
+      hatch-blast 1 [ init-blast true ]
+    ]
   ]
   ]
 end
+
+
+to walls::die
+  print "there"
+  if destructible? [ ioda:die ]
+end
+
+
+to-report magicwalls::rock-upper?
+  report any? rocks-on patch-at 0 1
+end
+
+to-report magicwalls::nothing-below?
+    report default::nothing-below?
+end
+
+to magicwalls::transform-rock-to-diamond
+ ; ask turtles-on patch-at 0 1 [ ioda:die ]
+  ask patch-at 0 -1 [ sprout-diamonds 1 [ init-diamond ] ]
+end
+
+to magicwalls::filter-neighbors
+  ioda:filter-neighbors-in-radius 1
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-572
--5
-834
-206
+532
+10
+777
+341
 -1
 -1
-36.0
+30.2
 1
 10
 1
@@ -632,7 +777,7 @@ GRAPHICS-WINDOW
 1
 0
 6
--4
+-9
 0
 1
 1
@@ -675,15 +820,15 @@ NIL
 1
 
 MONITOR
-25
-284
-97
-365
+22
+89
+94
+146
 NIL
 score
 0
 1
-20
+14
 
 SLIDER
 276
@@ -701,10 +846,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-187
-425
-250
-458
+284
+259
+347
+292
 up
 ask heros [ send-message 0 ]
 NIL
@@ -718,10 +863,10 @@ NIL
 1
 
 BUTTON
-186
-502
-251
-535
+283
+336
+348
+369
 down
 ask heros [ send-message 180 ]
 NIL
@@ -735,10 +880,10 @@ NIL
 1
 
 BUTTON
-186
-463
-250
-496
+283
+297
+347
+330
 STOP
 ask heros [ send-message \"STOP\" ]
 NIL
@@ -752,10 +897,10 @@ NIL
 1
 
 BUTTON
-256
-463
-319
-496
+353
+297
+416
+330
 right
 ask heros [ send-message 90 ]
 NIL
@@ -769,10 +914,10 @@ NIL
 1
 
 BUTTON
-118
-463
-181
-496
+215
+297
+278
+330
 left
 ask heros [ send-message -90 ]
 NIL
@@ -786,36 +931,36 @@ NIL
 1
 
 MONITOR
-112
-284
-278
-365
+20
+165
+186
+222
 diamonds left
 nb-to-collect
 0
 1
-20
+14
 
 CHOOSER
 278
 63
-434
+472
 108
 level
 level
-"levelRoll" "level_explosion" "level0" "level1" "level2"
-0
+"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba"
+14
 
 MONITOR
-287
-285
-445
-366
+23
+233
+181
+290
 monsters left
 count monsters
 0
 1
-20
+14
 
 SWITCH
 278
@@ -829,10 +974,10 @@ step-by-step?
 -1000
 
 SWITCH
-282
-190
-466
-223
+278
+165
+462
+198
 show-dijkstra?
 show-dijkstra?
 0
@@ -840,10 +985,10 @@ show-dijkstra?
 -1000
 
 BUTTON
-339
-427
 436
-460
+261
+533
+294
 dynamite
 ask heros [ heros::put-dynamite ]
 NIL
@@ -851,21 +996,32 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+5
 NIL
 NIL
 1
 
 MONITOR
-479
-277
-539
-322
+116
+91
+187
+148
 objectif
 objectif
 17
 1
-11
+14
+
+SWITCH
+277
+209
+380
+242
+ia?
+ia?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

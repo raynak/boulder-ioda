@@ -1,0 +1,11 @@
+[7 10]
+1
+XXXXXXX
+XH.D..X
+X.....X
+X.. ..X
+X.. ..X
+X.. ..X
+X.. ..X
+X..M..O
+XXXXXXX

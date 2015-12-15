@@ -1,4 +1,5 @@
 [25 25]
+8
 XXXXXXXXXXXXXXXXXXXXXXXXX
 X H ....................X
 XXXXXXXXXX..............X

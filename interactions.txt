@@ -75,8 +75,8 @@ parallel interaction ReadOrders
 end
 
 exclusive interaction Explode
-  condition	     moving?
-  actions 	     create-blast target:die die
+  condition	     moving? 
+  actions 	     target:die create-blast die
 end
 
 parallel interaction Collect
@@ -92,8 +92,18 @@ exclusive interaction Push
 end 
 
 exclusive interaction Spread
-  trigger	     can-spread?
+  trigger	     can-spread? time-to-spread?
   actions	     spread
+end
+
+parallel interaction Statufy
+  trigger 	     can-statufy?
+  actions	     die statufy
+end
+
+parallel interaction Diamontify
+  trigger 	     not:can-spread? 
+  actions	     die diamontify
 end
 
 parallel interaction ConvertToDiamond
@@ -111,4 +121,13 @@ parallel interaction ExplodeDynamite
   actions 	     explode
 end
 
+parallel interaction ConvertRock
+  trigger	     rock-upper? nothing-below?
+  actions	     target:die transform-rock-to-diamond
+end
+
+parallel interaction StopRock
+  trigger	     rock-upper?
+  actions	     target:stop-moving
+end
 

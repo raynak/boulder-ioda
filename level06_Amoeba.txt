@@ -1,0 +1,12 @@
+[7 10]
+0
+XXXXXXX
+X.H...X
+X.....X
+X. A .X
+X.....X
+X.....X
+X.....X
+X..A..X
+X..   O
+XXXXXXX

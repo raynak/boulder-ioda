@@ -1,0 +1,8 @@
+[7 7]
+1
+XXXXXXX
+XH D  X
+X DD  X
+X RD. X
+X R.  O
+XXXXXXX

@@ -18,11 +18,13 @@ amibes-own    [ time-spread ]
 blast-own     [ strength diamond-maker? time-birth ]
 diamonds-own  [ moving? ]
 doors-own     [ open? ]
-globals       [ score nb-to-collect countdown ]
+dynamite-own  [ on-floor? ]
+globals       [ score nb-to-collect countdown objectif ]
 heros-own     [ moving? orders open? nb-dynamite ]
 monsters-own  [ moving? right-handed? ]
 rocks-own     [ moving? ]
 walls-own     [ destructible? ]
+
 
 
 
@@ -54,6 +56,8 @@ to read-level [ filename ]
   file-open filename
   let s read-from-string file-read-line ; list with width and height
   resize-world 0 (first s - 1)  (1 - last s) 0
+  let nb ( read-from-string file-read-line + 0 )
+  set objectif nb
   let x 0 let y 0
   while [(y >= min-pycor) and (not file-at-end?)]
     [ set x 0
@@ -186,6 +190,7 @@ end
 to init-dynamite
   ioda:init-agent
   set color red
+  set on-floor? false
 end
 
 
@@ -235,7 +240,8 @@ to-report doors::closed?
 end
 
 to-report doors::objectives-fulfilled?
-  report nb-to-collect = 0
+  report objectif = 0
+ ; report nb-to-collect = 0
 end
 
 to doors::change-state
@@ -497,6 +503,9 @@ end
 to heros::increase-score
   set score score + 1
   set nb-to-collect nb-to-collect - 1
+  set objectif objectif - 1
+  print "collecte"
+  print nb-to-collect
 end
 
 to-report heros::has-dynamite?
@@ -504,9 +513,13 @@ to-report heros::has-dynamite?
 end
 
 to heros::put-dynamite
-  ask turtles-on patch-ahead 1 [
-   hatch-dynamite 1 [ init-dynamite ]
+  if heros::has-dynamite? [
+  print("putdynamite")
+  ask patch-ahead 1 [
+   sprout-dynamite 1 [ init-dynamite ]
   ]
+  ]
+  reset-timer
 end
 
 
@@ -521,6 +534,7 @@ end
 to blast::to-diamond
   ioda:die
   hatch-diamonds  1 [ init-diamond ]
+  set nb-to-collect nb-to-collect + 1
 end
 
 
@@ -586,10 +600,12 @@ end
 ; dynamite function
 
 to-report dynamite::can-explose?
-  report timer >= 1
+  print on-floor?
+  report timer >= 1 ;and on-floor?
 end
 
 to dynamite::explode
+  ioda:die
   ask neighbors  [ ask turtles-on patch-at 0 0 [
     ioda:die
     hatch-blast 1 [ init-blast true ]
@@ -600,7 +616,7 @@ end
 GRAPHICS-WINDOW
 572
 -5
-817
+834
 206
 -1
 -1
@@ -615,7 +631,7 @@ GRAPHICS-WINDOW
 0
 1
 0
-4
+6
 -4
 0
 1
@@ -788,7 +804,7 @@ CHOOSER
 level
 level
 "levelRoll" "level_explosion" "level0" "level1" "level2"
-2
+0
 
 MONITOR
 287
@@ -822,6 +838,34 @@ show-dijkstra?
 0
 1
 -1000
+
+BUTTON
+339
+427
+436
+460
+dynamite
+ask heros [ heros::put-dynamite ]
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+479
+277
+539
+322
+objectif
+objectif
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

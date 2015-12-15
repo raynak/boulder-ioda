@@ -40,10 +40,10 @@ rocks		StopFalling 	 10 	rocks		 1
 rocks		StopFalling 	 10 	doors	 	 1
 rocks 		RollLeft	 11
 rocks 		RollRight	 11  	  		 
-rocks		Explode 	 5 	monsters	 1 
+rocks		Explode 	 1 	monsters	 1 
 rocks		Explode 	 50 	heros		 1 
 
-monsters	Advance		 10 
+monsters	Advance		 19
 monsters	Turn		 20 	walls		 1 
 monsters	Turn		 20 	dirt		 1 
 monsters	Turn		 20 	diamonds	 1 
@@ -59,10 +59,10 @@ heros		Dig		 20 	dirt		 1
 heros		Push		 30	rocks		 1
 heros		Collect		 80    	diamonds	 1 
 heros		Explode		 100    monsters	 0 
-heros		PutDynamite	 110    
+;heros		PutDynamite	 110    
 
 blast 	        ConvertToDiamond 10     UPDATE
 
 amibes		Spread		 10	UPDATE		 
 
-dynamite        Explode		 10	UPDATE         
+dynamite        ExplodeDynamite	 10	UPDATE         

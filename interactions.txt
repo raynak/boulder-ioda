@@ -106,7 +106,7 @@ parallel interaction PutDynamite
   actions	     put-dynamite
 end
 
-parallel interaction Explode
+parallel interaction ExplodeDynamite
   trigger	     can-explose?
   actions 	     explode
 end

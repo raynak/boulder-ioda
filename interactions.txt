@@ -152,3 +152,22 @@ parallel interaction SpreadFire
   trigger	     on-fire? 
   actions	     target:turn-on-fire
 end
+
+parallel interaction Shine
+  trigger	     is-visible?
+  actions 	     shine
+end
+
+parallel interaction ShowTeleport
+  trigger           visible?
+  actions	    target:show
+end
+
+parallel interaction Teleport
+   trigger	    target-ahead?
+   condition        moving?
+   actions          die target:teleport move-forward	
+end
+
+
+

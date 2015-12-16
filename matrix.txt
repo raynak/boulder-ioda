@@ -64,7 +64,8 @@ heros		Explode		 100    monsters	 0
 heros	        TurnOnFire       10     flames           1
 heros	        Burn             20     woodwalls        1
 heros	        Burn             10     amibes           1
-
+heros 		ShowTeleport	 10	teleports	 0
+heros		Teleport	 10 	teleports        1
 blast 	        ConvertToDiamond 10     UPDATE
 
 amibes		Spread		 10	UPDATE	
@@ -74,8 +75,11 @@ amibes		Diamontify	 12	UPDATE
 dynamite        ExplodeDynamite	 10	UPDATE   
 
 
-magicwalls 	ConvertRock	 11      rocks		 1
-magicwalls 	StopRock	 5       rocks		 0
+magicwalls 	ConvertRock	11	rocks		1
+magicwalls 	StopRock	5	rocks		0
 
-woodwalls	SpreadFire       8     woodwalls        1
-woodwalls	Burned		 10 	UPDATE	
+woodwalls	SpreadFire	8	woodwalls	1
+woodwalls	Burned		10 	UPDATE	
+
+teleports	Shine		1	UPDATE
+

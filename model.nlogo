@@ -15,6 +15,7 @@ breed [amibes amibe]
 breed [dynamite]
 breed [woodwalls woodwall]
 breed [flames flame]
+breed [teleports teleport]
 
 amibes-own     [ time-spread ]
 blast-own      [ strength diamond-maker? time-birth ]
@@ -26,6 +27,7 @@ heros-own      [ moving? orders open? nb-dynamite on-fire? ]
 magicwalls-own [ destructible? ]
 monsters-own   [ moving? right-handed? ]
 rocks-own      [ moving? ]
+teleports-own   [ destructible? visible? ]
 walls-own      [ destructible? ]
 woodwalls-own  [ destructible? on-fire? time-burn ]
 
@@ -74,35 +76,31 @@ to go
                     ifelse level = "level05_MagicWall" [
                       set level "level06_Amoeba"
                     ]
-
                     [
-                      user-message "YOU JUST FINISHED THE GAME! CONGRATULATIONS!"
-                      stop
+                      ifelse level = "level06_Amoeba" [
+                        set level "level07_WoodWall"
+                      ]
+                      [
+                        ifelse level = "level07_WoodWall" [
+                          set level "level08_Teleport"
+                        ]
+                        [
+                          user-message "YOU JUST FINISHED THE GAME! CONGRATULATIONS!"
+                          stop
+                        ]
+                      ]
                     ]
                   ]
                 ]
               ]
             ]
+            init-world
+            setup
           ]
-          init-world
-          setup
       ]
     ]
 end
-  ;        [ user-message "CONGRATULATIONS !" stop ][]
-;;        [ if ia? [
-;;          ask all? heros [
-;;            let t 3 heros::next-destination
-;;
-;;            heros::move-forward
-;;          ]
-;;        ]
-;;        ]
-;    ]
-;
-;
-;
-;end
+
 
 to read-level [ filename ]
   print "lecture"
@@ -150,14 +148,14 @@ to create-agent [ char ]
                                   [ ifelse (char = "F")
                                     [ sprout-flames 1 [ init-flame ]]
                                     [ ifelse (char = "B")
-                                    [ sprout-woodwalls 1 [ init-woodwall ]]
-                                    [ ;
+                                      [ sprout-woodwalls 1 [ init-woodwall ]]
+                                      [ ifelse (char = "Z")
+                                        [ sprout-teleports 1 [ init-teleport]]
+                                        [ ;
+                                        ]
+                                      ];;
                                     ]
-                                    ];
-                                  ]
-                                ]
-
-
+                                  ];
                                 ]
                               ]
                             ]
@@ -166,7 +164,7 @@ to create-agent [ char ]
                 ]
             ]
         ]
-
+    ]
 end
 
 to init-world
@@ -183,6 +181,7 @@ to init-world
   set-default-shape magicwalls "tile brick"
   set-default-shape flames "sun"
   set-default-shape woodwalls "tile log"
+  set-default-shape teleports "target"
 
   read-level (word level ".txt")
   set countdown 0
@@ -286,6 +285,15 @@ to init-woodwall
   set destructible? false
   set on-fire? false
   set time-burn 20
+end
+
+to init-teleport
+  ioda:init-agent
+  set color brown + 3
+  set heading 0
+  set visible? false
+  set shape "dirt"
+  set destructible? false
 end
 
 
@@ -620,9 +628,12 @@ end
 to heros::put-dynamite
   if heros::has-dynamite? [
   print("putdynamite")
-  ask patch-ahead 1 [
+  ask patch-here [
    sprout-dynamite 1 [ init-dynamite ]
   ]
+;  right 180
+;  heros::move-forward
+;  heros::move-forward
   ]
   reset-timer
 end
@@ -637,9 +648,22 @@ to heros::turn-on-fire
   set color red
 end
 
+to-report heros::move-to-teleport?
+  print "test move to teleport"
+print ( [ breed ] of turtles-on patch-ahead 1 )
+  print ( turtles-on patch-ahead 1 = teleports )
+  print "bidule"
+  report ( ( [breed] of turtles-on patch-ahead 1 = teleports ) )
+end
 
+to-report heros::on-teleport?
+  print "onteleport?"
+  report any? teleports-on patch-here
+end
 
-
+to-report heros::visible?
+  report true
+end
 
 ; blast functions
 
@@ -697,7 +721,6 @@ to-report heros::can-burn?
   print "can burn"
   report ( any? woodwalls-on ([neighbors4] of patch-here)  )
 end
-
 
 
 
@@ -773,7 +796,7 @@ end
 to dynamite::explode
   ioda:die
   ask neighbors  [ ask turtles-on patch-at 0 0 [
-    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls ) or ( [ breed ] of self != woodwalls ) ) [
+    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls and  [ breed ] of self != woodwalls ) ) [
       ioda:die
       hatch-blast 1 [ init-blast true ]
     ]
@@ -858,12 +881,79 @@ end
 ;    woodwalls::turn-on-fire
 ;  ]
 ;end
+
+
+
+
+; teleport function
+
+to teleports::shine
+  if visible? [
+    ifelse any? heros-on patch-here  [
+    set shape "person"
+    let t one-of heros-on patch-here
+    set color [color] of t
+  ] [
+      set shape "target"
+
+  ifelse color = yellow [
+    set color orange ] [
+  ifelse color = orange [
+    set color red ] [
+  ifelse color = red [
+    set color white ]
+  [set color yellow]
+    ]
+    ]
+  ]
+  ]
+  end
+
+to teleports::show
+  set visible? true
+  ifelse any? heros-on patch-here  [
+    set shape "person"
+    let t one-of heros-on patch-here
+    set color [color] of t
+  ] [
+      set shape "target"
+      set color white
+  ]
+end
+
+to-report teleports::is-visible?
+  report visible?
+end
+
+
+to teleports::filter-neighbors
+  ioda:filter-neighbors-in-radius 1
+end
+
+to teleports::teleport
+  teleports::show
+  let t one-of patches with [ any? teleports-here and not any? patch-here ]
+  ask turtles-on t [
+    teleports::show
+  ]
+   ask t [
+    sprout-heros 1 [init-hero]
+
+  ]
+end
+
+to teleports::hero-shape
+  set shape "person"
+  let p one-of patches with [ any? heros-here ]
+  let t one-of turtles-on p
+  set color [color] of t
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 532
 10
-777
-343
+1114
+372
 -1
 -1
 30.2
@@ -877,8 +967,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-6
--9
+18
+-10
 0
 1
 1
@@ -1049,8 +1139,8 @@ CHOOSER
 108
 level
 level
-"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall"
-15
+"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall" "level08_Teleport"
+16
 
 MONITOR
 23

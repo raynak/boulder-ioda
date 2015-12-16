@@ -131,3 +131,24 @@ parallel interaction StopRock
   actions	     target:stop-moving
 end
 
+parallel interaction TurnOnFire
+  trigger	     target-ahead?
+  condition	     moving? 
+  actions	     target:die move-forward turn-on-fire
+end
+
+parallel interaction Burn
+  trigger	     on-fire?
+  condition          can-burn?
+  actions	     target:turn-on-fire
+end
+
+parallel interaction Burned
+  trigger	     on-fire? burned?
+  actions	     die 
+end
+
+parallel interaction SpreadFire
+  trigger	     on-fire? 
+  actions	     target:turn-on-fire
+end

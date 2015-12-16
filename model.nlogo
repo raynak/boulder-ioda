@@ -13,21 +13,24 @@ breed [dirt]
 breed [blast]
 breed [amibes amibe]
 breed [dynamite]
-
+breed [woodwalls woodwall]
+breed [flames flame]
 
 amibes-own     [ time-spread ]
 blast-own      [ strength diamond-maker? time-birth ]
 diamonds-own   [ moving? ]
 doors-own      [ open? ]
 dynamite-own   [ on-floor? ]
-globals        [ score nb-to-collect countdown objectif ]
-heros-own      [ moving? orders open? nb-dynamite ]
+globals        [ score nb-to-collect countdown objectif info ]
+heros-own      [ moving? orders open? nb-dynamite on-fire? ]
 magicwalls-own [ destructible? ]
 monsters-own   [ moving? right-handed? ]
 rocks-own      [ moving? ]
 walls-own      [ destructible? ]
+woodwalls-own  [ destructible? on-fire? time-burn ]
 
 patches-own   [ dijkstra-distance ]
+
 
 to setup
   clear-all
@@ -110,6 +113,8 @@ to read-level [ filename ]
   let nb ( read-from-string file-read-line + 0 )
   print nb
   set objectif nb
+  set info file-read-line
+  output-print info
   let x 0 let y 0
   while [(y >= min-pycor) and (not file-at-end?)]
     [ set x 0
@@ -141,11 +146,19 @@ to create-agent [ char ]
                               [ ifelse (char = ".")
                                 [ sprout-dirt 1 [ init-dirt ]]
                                 [ ifelse (char = "W")
-                                [ sprout-magicwalls 1 [ init-magicwall ]]
-                                [ ;
-                                ]
+                                  [ sprout-magicwalls 1 [ init-magicwall ]]
+                                  [ ifelse (char = "F")
+                                    [ sprout-flames 1 [ init-flame ]]
+                                    [ ifelse (char = "B")
+                                    [ sprout-woodwalls 1 [ init-woodwall ]]
+                                    [ ;
+                                    ]
+                                    ];
+                                  ]
                                 ]
 
+
+                                ]
                               ]
                             ]
                         ]
@@ -153,7 +166,7 @@ to create-agent [ char ]
                 ]
             ]
         ]
-    ]
+
 end
 
 to init-world
@@ -168,6 +181,8 @@ to init-world
   set-default-shape amibes "rock 1"
   set-default-shape dynamite "target"
   set-default-shape magicwalls "tile brick"
+  set-default-shape flames "sun"
+  set-default-shape woodwalls "tile log"
 
   read-level (word level ".txt")
   set countdown 0
@@ -177,11 +192,12 @@ end
 to init-hero
   ioda:init-agent
   set heading 0
-  set color red
+  set color blue
   set moving? false
   set open? false
   set orders []
   set nb-dynamite 2
+  set on-fire? false
 end
 
 to init-door
@@ -255,6 +271,21 @@ to init-dynamite
   ioda:init-agent
   set color red
   set on-floor? false
+end
+
+to init-flame
+  ioda:init-agent
+  set color orange
+  set heading random 360
+end
+
+to init-woodwall
+  ioda:init-agent
+  set color brown
+  set heading 0
+  set destructible? false
+  set on-fire? false
+  set time-burn 20
 end
 
 
@@ -543,6 +574,10 @@ to-report heros::message-received?
   report not empty? orders
 end
 
+to-report heros::on-fire?
+  report on-fire?
+end
+
 to heros::handle-messages
   foreach orders
     [ let m ?
@@ -597,6 +632,13 @@ to-report heros::next-destination
   report min-one-of p [ dijkstra-distance ] ;[ neighbors4 ] of patch-here  [ dijkstra-distance ]
 end
 
+to heros::turn-on-fire
+  set on-fire? true
+  set color red
+end
+
+
+
 
 
 ; blast functions
@@ -649,6 +691,11 @@ to heros::propagate-dist
       set p pp ]
 ;    ask patches with [  any? magicwalls-here or any? rocks-here ]
 ;    [ set dijkstra-distance 1000 set plabel "" ]
+end
+
+to-report heros::can-burn?
+  print "can burn"
+  report ( any? woodwalls-on ([neighbors4] of patch-here)  )
 end
 
 
@@ -726,7 +773,7 @@ end
 to dynamite::explode
   ioda:die
   ask neighbors  [ ask turtles-on patch-at 0 0 [
-    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls ) ) [
+    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls ) or ( [ breed ] of self != woodwalls ) ) [
       ioda:die
       hatch-blast 1 [ init-blast true ]
     ]
@@ -757,12 +804,66 @@ end
 to magicwalls::filter-neighbors
   ioda:filter-neighbors-in-radius 1
 end
+
+
+
+
+
+; flame functions
+
+to flames::filter-neighbors
+  ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
+end
+
+to flames::die
+  ioda:die
+end
+
+
+
+
+
+; woodwall function
+to woodwalls::turn-on-fire
+  set color orange
+  set on-fire? true
+end
+
+to-report woodwalls::on-fire?
+  report on-fire?
+end
+
+to-report woodwalls::burned?
+  set time-burn time-burn - 1
+  report time-burn <= 0
+end
+
+to woodwalls::burned
+  ioda:die
+  hatch-flames 1 [ init-flame ]
+end
+
+to woodwalls::die
+  ioda:die
+end
+
+
+to woodwalls::filter-neighbors
+  ioda:filter-neighbors-in-radius 1
+end
+
+;to woodwalls:birthflame
+;  ask neighbors4 with [ any? woodwalls-here ] [
+;    ask turtles-on
+;    woodwalls::turn-on-fire
+;  ]
+;end
 @#$#@#$#@
 GRAPHICS-WINDOW
 532
 10
 777
-341
+343
 -1
 -1
 30.2
@@ -948,8 +1049,8 @@ CHOOSER
 108
 level
 level
-"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba"
-14
+"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall"
+15
 
 MONITOR
 23
@@ -985,10 +1086,10 @@ show-dijkstra?
 -1000
 
 BUTTON
-436
-261
-533
-294
+355
+259
+452
+292
 dynamite
 ask heros [ heros::put-dynamite ]
 NIL
@@ -1019,9 +1120,20 @@ SWITCH
 242
 ia?
 ia?
-0
+1
 1
 -1000
+
+MONITOR
+17
+379
+666
+424
+Tuto
+info
+12
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

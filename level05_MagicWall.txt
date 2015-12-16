@@ -1,5 +1,6 @@
 [7 10]
 1
+Les pierres passent à travers les murs magiques et se transforment en diamant.
 XXXXXXX
 X.H RDX
 X.R   X

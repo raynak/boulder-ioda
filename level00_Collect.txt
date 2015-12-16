@@ -1,5 +1,6 @@
 [5 5]
 3
+Petit niveau pour débuter : Objectif ramasser 3 diamants pour faire apparaitr la sortie.
 XXXXX
 XH.DX
 X. DX

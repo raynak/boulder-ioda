@@ -61,7 +61,9 @@ heros		Dig		 20 	dirt		 1
 heros		Push		 30	rocks		 1
 heros		Collect		 80    	diamonds	 1 
 heros		Explode		 100    monsters	 0 
-;heros		PutDynamite	 110    
+heros	        TurnOnFire       10     flames           1
+heros	        Burn             20     woodwalls        1
+heros	        Burn             10     amibes           1
 
 blast 	        ConvertToDiamond 10     UPDATE
 
@@ -71,5 +73,9 @@ amibes		Diamontify	 12	UPDATE
 
 dynamite        ExplodeDynamite	 10	UPDATE   
 
+
 magicwalls 	ConvertRock	 11      rocks		 1
 magicwalls 	StopRock	 5       rocks		 0
+
+woodwalls	SpreadFire       8     woodwalls        1
+woodwalls	Burned		 10 	UPDATE	

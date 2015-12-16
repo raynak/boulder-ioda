@@ -1,5 +1,6 @@
 [7 7]
 0
+Les rochers tombent et roulent. FOncez vers la sortie.
 XXXOXXX
 XH R  X
 X  R  X

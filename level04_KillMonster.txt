@@ -1,5 +1,6 @@
 [7 10]
 1
+Creusez la terre pour faire tomber la pierre sur le monstre.
 XXXXXXX
 XH.D..X
 X.....X

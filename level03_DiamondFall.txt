@@ -1,5 +1,6 @@
 [7 7]
 1
+Les diamants tombent et roulent. Collectez et sortez.
 XXXXXXX
 XH D  X
 X DD  X

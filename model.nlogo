@@ -545,7 +545,9 @@ end
 
 
 
-; hero-related primitives
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; hero function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to send-message [ value ]
   set orders lput value orders
@@ -569,8 +571,6 @@ to-report heros::moving?
           face heros::next-destination
           set moving? true
         ][]
-  ;print patch-here
-  ;print min-one-of [ neighbors4 ] of patch-here  [ dijkstra-distance ]
   report moving?
 end
 
@@ -627,13 +627,9 @@ end
 
 to heros::put-dynamite
   if heros::has-dynamite? [
-  print("putdynamite")
   ask patch-here [
-   sprout-dynamite 1 [ init-dynamite ]
+    sprout-dynamite 1 [ init-dynamite ]
   ]
-;  right 180
-;  heros::move-forward
-;  heros::move-forward
   ]
   reset-timer
 end
@@ -665,31 +661,6 @@ to-report heros::visible?
   report true
 end
 
-; blast functions
-
-to-report blast::time-to-change?
-  report ( ( ticks - time-birth ) >= 2 )
-end
-
-to blast::to-diamond
-  ioda:die
-  hatch-diamonds  1 [ init-diamond ]
-  set nb-to-collect nb-to-collect + 1
-end
-
-to blast::filter-neighbors
-  ioda:filter-neighbors-in-radius 1
-end
-
-
-to labelize
-  ask patches with [ not any? walls-here ] [ set plabel dijkstra-distance ]
-end
-
-to-report obstacle-here? [mykeys immediate?]
-  report (pcolor = black) or (any? walls-here)
-end
-
 
 
 to heros::propagate-dist
@@ -717,6 +688,8 @@ to heros::propagate-dist
 ;    [ set dijkstra-distance 1000 set plabel "" ]
 end
 
+
+
 to-report heros::can-burn?
   print "can burn"
   report ( any? woodwalls-on ([neighbors4] of patch-here)  )
@@ -724,10 +697,43 @@ end
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; blast function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to-report blast::time-to-change?
+  report ( ( ticks - time-birth ) >= 2 )
+end
+
+to blast::to-diamond
+  ioda:die
+  hatch-diamonds  1 [ init-diamond ]
+  set nb-to-collect nb-to-collect + 1
+end
+
+to blast::filter-neighbors
+  ioda:filter-neighbors-in-radius 1
+end
+
+
+to labelize
+  ask patches with [ not any? walls-here ] [ set plabel dijkstra-distance ]
+end
+
+to-report obstacle-here? [mykeys immediate?]
+  report (pcolor = black) or (any? walls-here)
+end
 
 
 
-; amibes function
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; amibes function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to amibes::filter-neighbors
   ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
@@ -736,7 +742,7 @@ end
 to-report amibes::can-spread?
   set time-spread time-spread - 1
   print time-spread
-  report ( any? dirt-on ([neighbors4] of patch-here) )
+  report ( any? dirt-on ([neighbors4] of patch-here) or not any? turtles-on  ([neighbors4] of patch-here) )
 end
 
 to-report amibes::time-to-spread?
@@ -759,7 +765,7 @@ to amibes::spread
 end
 
 to-report amibes::can-statufy?
-  report ( ( random 100 ) > 98 )
+  report ( ( random 100 ) > 97 )
 end
 
 to amibes::statufy
@@ -786,12 +792,15 @@ end
 
 
 
-; dynamite function
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; dynamite function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to-report dynamite::can-explose?
   print on-floor?
   report timer >= 1 ;and on-floor?
 end
+
 
 to dynamite::explode
   ioda:die
@@ -805,8 +814,12 @@ to dynamite::explode
 end
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; walls function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 to walls::die
-  print "there"
   if destructible? [ ioda:die ]
 end
 
@@ -829,10 +842,9 @@ to magicwalls::filter-neighbors
 end
 
 
-
-
-
-; flame functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; flame function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to flames::filter-neighbors
   ioda:filter-neighbors-on-patches (patch-set patch-here patch-at 0 -1)
@@ -845,8 +857,10 @@ end
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; woodwall function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; woodwall function
 to woodwalls::turn-on-fire
   set color orange
   set on-fire? true
@@ -875,37 +889,32 @@ to woodwalls::filter-neighbors
   ioda:filter-neighbors-in-radius 1
 end
 
-;to woodwalls:birthflame
-;  ask neighbors4 with [ any? woodwalls-here ] [
-;    ask turtles-on
-;    woodwalls::turn-on-fire
-;  ]
-;end
 
 
 
-
-; teleport function
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; teleport function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to teleports::shine
   if visible? [
     ifelse any? heros-on patch-here  [
-    set shape "person"
-    let t one-of heros-on patch-here
-    set color [color] of t
-  ] [
-      set shape "target"
+      set shape "person"
+      let t one-of heros-on patch-here
+      set color [color] of t
+    ] [
+    set shape "target"
 
-  ifelse color = yellow [
-    set color orange ] [
-  ifelse color = orange [
-    set color red ] [
-  ifelse color = red [
-    set color white ]
-  [set color yellow]
+    ifelse color = yellow [
+      set color orange ] [
+    ifelse color = orange [
+      set color red ] [
+    ifelse color = red [
+      set color white ]
+    [set color yellow]
+      ]
+      ]
     ]
-    ]
-  ]
   ]
   end
 
@@ -932,13 +941,15 @@ end
 
 to teleports::teleport
   teleports::show
-  let t one-of patches with [ any? teleports-here and not any? patch-here ]
+  let t one-of patches with [ any? teleports-here ]
+  while [ t = patch-here  ] [
+    set t one-of patches with [ any? teleports-here ]
+  ]
   ask turtles-on t [
     teleports::show
   ]
-   ask t [
+  ask t [
     sprout-heros 1 [init-hero]
-
   ]
 end
 
@@ -952,8 +963,8 @@ end
 GRAPHICS-WINDOW
 532
 10
-1114
-372
+1112
+371
 -1
 -1
 30.2

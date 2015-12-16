@@ -2,7 +2,7 @@
 1
 Creusez la terre pour faire tomber la pierre sur le monstre.
 XXXXXXX
-XH.D..X
+XH.R..X
 X.....X
 X.. ..X
 X.. ..X

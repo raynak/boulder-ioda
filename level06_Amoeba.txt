@@ -1,13 +1,13 @@
 [7 10]
-0
+5
 Les amibes se répandent et se transforment en pierre ou en diamant.
 XXXXXXX
 X.H...X
-X.....X
+X.. ..X
 X. A .X
+X.. ..X
 X.....X
-X..B..X
-X..F..X
+X.. ..X
 X..A..X
 X..   O
 XXXXXXX

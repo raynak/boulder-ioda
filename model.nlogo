@@ -22,12 +22,12 @@ blast-own      [ strength diamond-maker? time-birth ]
 diamonds-own   [ moving? ]
 doors-own      [ open? ]
 dynamite-own   [ on-floor? ]
-globals        [ score nb-to-collect countdown objectif info ]
+globals        [ score nb-to-collect countdown objectif info hero-on-fire? ]
 heros-own      [ moving? orders open? nb-dynamite on-fire? ]
 magicwalls-own [ destructible? ]
 monsters-own   [ moving? right-handed? ]
 rocks-own      [ moving? ]
-teleports-own   [ destructible? visible? ]
+teleports-own  [ destructible? visible? target-on-fire? ]
 walls-own      [ destructible? ]
 woodwalls-own  [ destructible? on-fire? time-burn ]
 
@@ -85,8 +85,18 @@ to go
                           set level "level08_Teleport"
                         ]
                         [
-                          user-message "YOU JUST FINISHED THE GAME! CONGRATULATIONS!"
-                          stop
+                          ifelse level = "level08_Teleport" [
+                            set level "levelCalice"
+                          ]
+                          [
+                            ifelse level = "levelCalice" [
+                              set level "levelFinal"
+                            ]
+                            [
+                              user-message "YOU JUST FINISHED THE GAME! CONGRATULATIONS!"
+                              stop
+                            ]
+                          ]
                         ]
                       ]
                     ]
@@ -94,9 +104,10 @@ to go
                 ]
               ]
             ]
-            init-world
-            setup
           ]
+          init-world
+          setup
+
       ]
     ]
 end
@@ -132,7 +143,7 @@ to create-agent [ char ]
         [ ifelse (char = "O")
             [ sprout-doors 1 [ init-door ]]
             [ ifelse (char = "H")
-                [ sprout-heros 1 [ init-hero ]]
+                [ sprout-heros 1 [ init-hero ] ]
                 [ ifelse (char = "D")
                     [ sprout-diamonds 1 [ init-diamond ]]
                     [ ifelse (char = "R")
@@ -153,10 +164,10 @@ to create-agent [ char ]
                                         [ sprout-teleports 1 [ init-teleport]]
                                         [ ;
                                         ]
-                                      ];;
+                                      ]
                                     ]
-                                  ];
-                                ]
+                                  ]
+                                ];
                               ]
                             ]
                         ]
@@ -186,6 +197,7 @@ to init-world
   read-level (word level ".txt")
   set countdown 0
   set nb-to-collect count diamonds
+  set hero-on-fire? false
 end
 
 to init-hero
@@ -196,7 +208,7 @@ to init-hero
   set open? false
   set orders []
   set nb-dynamite 2
-  set on-fire? false
+
 end
 
 to init-door
@@ -583,7 +595,7 @@ to-report heros::message-received?
 end
 
 to-report heros::on-fire?
-  report on-fire?
+  report hero-on-fire?
 end
 
 to heros::handle-messages
@@ -640,7 +652,7 @@ to-report heros::next-destination
 end
 
 to heros::turn-on-fire
-  set on-fire? true
+  set hero-on-fire? true
   set color red
 end
 
@@ -805,7 +817,7 @@ end
 to dynamite::explode
   ioda:die
   ask neighbors  [ ask turtles-on patch-at 0 0 [
-    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls and  [ breed ] of self != woodwalls ) ) [
+    if ( ( [ breed ] of self = walls  and destructible? ) or ( [ breed ] of self != walls and  [ breed ] of self != woodwalls and  [ breed ] of self != doors and  [ breed ] of self != dirt )  )  [
       ioda:die
       hatch-blast 1 [ init-blast true ]
     ]
@@ -939,6 +951,7 @@ to teleports::filter-neighbors
   ioda:filter-neighbors-in-radius 1
 end
 
+
 to teleports::teleport
   teleports::show
   let t one-of patches with [ any? teleports-here ]
@@ -948,9 +961,10 @@ to teleports::teleport
   ask turtles-on t [
     teleports::show
   ]
-  ask t [
-    sprout-heros 1 [init-hero]
-  ]
+    ask t [
+    sprout-heros 1 [ init-hero ]
+    ]
+    if hero-on-fire? [ ask n-of (count heros ) heros  [ set color red ] ]
 end
 
 to teleports::hero-shape
@@ -961,13 +975,13 @@ to teleports::hero-shape
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-532
+476
 10
-1112
-371
+1702
+431
 -1
 -1
-30.2
+21.95
 1
 10
 1
@@ -978,8 +992,8 @@ GRAPHICS-WINDOW
 0
 1
 0
-18
--10
+55
+-17
 0
 1
 1
@@ -1150,8 +1164,8 @@ CHOOSER
 108
 level
 level
-"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall" "level08_Teleport"
-16
+"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall" "level08_Teleport" "levelFinal"
+17
 
 MONITOR
 23
@@ -1226,10 +1240,10 @@ ia?
 -1000
 
 MONITOR
-17
-379
-666
-424
+3
+434
+652
+479
 Tuto
 info
 12
@@ -1253,8 +1267,34 @@ You just have to click on **`setup`**, then on **`go`**. Your aim is to endow th
 
 ## IMPLEMENTATION CHOICES ##
 
-* Amibe : the amibe can spread every 10 seconds if there is any dirt around.
-Then only one amibe can spread at that time, randomly choose among the amoeba on the game
+Some of new agent have been implemented, some was asked, some are new ones.
+
+* Magic Wall : rocks passes through and turn into diamond, others agent can't pass through
+
+* Amibe : the amibe can spread every 10 seconds if there is any dirt around or any free patch around. Amibe can turn into stone randomly and turn into diamond when it can't spread
+
+* Dynamite : explode rocks, destructible walls and monsters in a radius of one. Don't explode dirt, wood, door and indestructible walls. Dynamite hatch under the hero. Think to run fast if you don't want hero to explode with his one bomb.
+
+* Wood : a new type of wall that can't be destruct by dynamite. To destroy it, the hero must be on fire and touch it. When wood burns, fire spread two the next wood. After 5 ticks, wood disappear.
+
+* Flame : when hero pass through, he goes "on fire" and can burn amibes and wood
+
+* Teleport : when hero pass through, he goes to another teleport in the level. If there is more than 2 teleports, the hero is send to a different teleporter than the one he came from. If the hero is 'on fire", he stay in the same state.
+
+* There again a lot of things possibles : water and flood fill, oxygen and time before breath lost, trap for monsters, and even more with imagination and time... (ahhhhh TIME)
+
+A panel show you the objectif to reach. Even there is no diamond in a level, there is a way to reach the objectif if it need to collect diamonds.
+
+The levels succeeded one to an another when you finish. If you don't want to begin by the level00 you can change it.
+The succession of levels explains all the comportment of the different agents implemented.
+
+For each level, the monitor give you a little hint to resolve it.
+Before the last level, my daughter (10 years old) wanted to make a level and put it in. Enjoy !!
+
+At last, a simple artificial intelligence has been developped. It works with dijkstra and choose the shortest path to reach diamonds if the door is not open, the shortest path to the door also.
+It can choose a new path to get around obstacle if it can (see this effect in the magic walls level). But can't push rocks or put dynamite if the path is blocked.
+
+
 
 ## HOW TO CITE
 

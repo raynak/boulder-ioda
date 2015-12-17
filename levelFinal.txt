@@ -1,0 +1,21 @@
+[56 18]
+30
+Level final : amusez-vous
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XH............X    MRRRR   X........R.......X
+XXXXXXXXxxxXXXXBBBBBBBBBBBXXX...XXXXXXXX....X           
+X......DRDRDRDXB           X....xA.....x....X
+X.............XB   WWWW M  X....x...A..x....X
+X.............BB           X....x......x....X
+X...Z..       X            X....XXXXXXXX....X
+XXXXXXXXXXXXXXX  RXXXXXXR  .................X     
+X......DRDRDRDX  D    M D  .................X
+X......XXXXXXXOxXXXXXXXXX..XXXXX.XXXXXXXXXXXX
+X.......RRRRRRX.....................R.......X
+XR......R.....X....XXXXX.R...D.........RR...X
+X.......R DDD X....XF ZX.D.....W........R...X
+X X...........RRR..XXXXX.xxx.D.....Z....R...X
+X X....   M ..R.R........xDx................X
+X X..........BBBBB....R..xxx.........R......X
+XMX..........BDDDB..................D.......X
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

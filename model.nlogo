@@ -977,8 +977,8 @@ end
 GRAPHICS-WINDOW
 476
 10
-1702
-431
+1715
+436
 -1
 -1
 21.95
@@ -1164,8 +1164,8 @@ CHOOSER
 108
 level
 level
-"levelCalice" "levelRoll" "level_explosion" "level0" "level1" "level1bis" "level2" "levelMagicWall" "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall" "level08_Teleport" "levelFinal"
-17
+"level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall" "level08_Teleport" "levelCalice" "levelFinal" "level1" "level2"
+0
 
 MONITOR
 23
@@ -1240,10 +1240,10 @@ ia?
 -1000
 
 MONITOR
-3
-434
-652
-479
+8
+438
+657
+483
 Tuto
 info
 12

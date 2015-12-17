@@ -1,4 +1,6 @@
 [25 25]
+6
+Smac level 2
 XXXXXXXXXXXXXXXXXXXXXXXXX
 X H                     X
 XXXXXXXXXX              X

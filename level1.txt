@@ -1,5 +1,6 @@
 [25 25]
 8
+Smac level 1
 XXXXXXXXXXXXXXXXXXXXXXXXX
 X H ....................X
 XXXXXXXXXX..............X

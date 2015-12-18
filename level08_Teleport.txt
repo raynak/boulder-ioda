@@ -1,0 +1,14 @@
+[19 11]
+3
+Les téléporteurs s'enchainent aléatoirement.
+XXXXXXXXXXXXXXXXXXX
+X.H..B...X.......DX
+X.F......X....Z...X
+X.Z......X.B .....X
+X.D......X.... ..ZX
+XXXXXXXXXXXXXXXXXXX
+XD.......X.....Z..X
+X........X........X
+X........X...B....X
+X.Z..B...X........O
+XXXXXXXXXXXXXXXXXXX

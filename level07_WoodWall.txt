@@ -1,0 +1,13 @@
+[7 10]
+0
+Le feu brule le bois indestructible par la dynamite.
+XXXXXXX
+X.H..FX
+X.....X
+X. B .X
+X.....X
+X.....X
+X...BBX
+X...B.X
+X.. B O
+XXXXXXX

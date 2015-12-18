@@ -977,8 +977,8 @@ end
 GRAPHICS-WINDOW
 476
 10
-1715
-436
+1701
+431
 -1
 -1
 21.95
@@ -1165,7 +1165,7 @@ CHOOSER
 level
 level
 "level00_Collect" "level01_RockFall" "level02_RockPush" "level03_DiamondFall" "level04_KillMonster" "level05_MagicWall" "level06_Amoeba" "level07_WoodWall" "level08_Teleport" "levelCalice" "levelFinal" "level1" "level2"
-0
+10
 
 MONITOR
 23
@@ -1257,7 +1257,7 @@ This file is a basic implementation of the "Boulder Dash" video game (1984) with
 
 ## HOW IT WORKS
 
-A cave is initialized in the setup procedure. The main character has to dig the dirt to collect all diamonds initially present without being killed by monsters or falling rocks or diamonds. Agents can move only in their von Neumann neighborhood (4 neighbors). When all diamonds have been collected, the hero must reach the exit that appears in the cave.
+A cave is initialized in the setup procedure. The main character has to dig into the dirt to collect all diamonds initially present without being killed by monsters or falling rocks and diamonds. Agents can move only in their von Neumann neighborhood (4 neighbors). When all diamonds have been collected, the hero must reach the exit that appears in the cave.
 
 
 ## HOW TO USE IT
